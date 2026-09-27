@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AL WAFI // INFORMATICS QUIZ</title>
+<style>
+:root{--bg:#060a12;--panel:#0c1422;--panel2:#101b2c;--line:#26364f;--cyan:#00e5ff;--green:#00ff9d;--red:#ff5370;--text:#e9f3ff;--muted:#8fa4c0}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 20% 0%,#10283d,#060a12 48%,#03050a);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(#fff1 1px,transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px);background-size:36px 36px;opacity:.18}
+header{position:sticky;top:0;z-index:5;background:#060a12ed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:12px} .chip{width:42px;height:42px;border:1px solid var(--cyan);border-radius:10px;display:grid;place-items:center;color:var(--cyan);font-weight:900;box-shadow:0 0 20px #00e5ff22}
+h1{font-size:16px;letter-spacing:.08em;margin:0} header small{color:var(--muted)} .container{max-width:1200px;margin:28px auto;padding:0 18px}
+.card{background:#0b1220f2;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 18px 55px #0008}
+.hidden{display:none!important} .accent{color:var(--cyan)} label{display:block;color:var(--muted);font-size:13px;margin-top:14px}
+input{width:100%;background:#070d17;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:13px;margin-top:6px;outline:none} input:focus{border-color:var(--cyan)}
+button{font:inherit;font-weight:800;border:0;border-radius:10px;padding:11px 15px;cursor:pointer} .primary{background:var(--cyan);color:#031018} .secondary{background:#162338;color:var(--text);border:1px solid var(--line)} .danger{background:#381722;color:#ff91a4;border:1px solid #743246}
+.actions{display:flex;gap:10px;margin-top:18px} .actions button{flex:1} .msg{min-height:22px;color:var(--red)}
+#layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px} .top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+#timer{font-weight:900;color:var(--cyan);font-size:16px} .question{white-space:pre-line;font-size:19px;line-height:1.65;margin:22px 0}
+.option{display:block;width:100%;text-align:left;margin:9px 0;background:#0e192a;color:var(--text);border:1px solid var(--line)} .option.selected{border-color:var(--cyan);background:#092633;box-shadow:inset 3px 0 var(--cyan)}
+.nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px} .nav button{padding:9px 0;background:#101b2c;color:var(--muted);border:1px solid var(--line)} .nav button.current{background:var(--cyan);color:#031018} .nav button.answered{border-color:var(--green);color:var(--green)}
+table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--cyan)} .score{color:var(--green);font-weight:900}
+@media(max-width:800px){header{position:static}#layout{grid-template-columns:1fr}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="chip">&lt;/&gt;</div><div><h1>AL WAFI // INFORMATICS QUIZ</h1><small>SMP AL WAFI ISLAMIC BOARDING SCHOOL • CLASS 8</small></div></div><div id="badge"></div></header>
+<div class="container">
+
+<section id="start" class="card">
+<h2><span class="accent">SYSTEM READY</span> — Masuk Kuis</h2>
+<p style="color:var(--muted)">Masukkan identitas untuk memulai assessment.</p>
+<label>Nama Siswa</label><input id="name" autocomplete="off">
+<label>Kelas</label><input id="class" autocomplete="off" placeholder="Contoh: 8A">
+<label>Password</label><input id="password" type="password" autocomplete="off">
+<div class="actions"><button class="primary" id="startBtn">START QUIZ</button><button class="secondary" id="scoresBtn">DAFTAR NILAI</button></div>
+<p id="startMsg" class="msg"></p>
+</section>
+
+<section id="quiz" class="hidden">
+<div id="layout">
+<main class="card">
+<div class="top"><b id="qNo"></b><span id="progress"></span><span id="timer">70:00</span></div>
+<hr style="border-color:var(--line)">
+<div id="question" class="question"></div>
+<div id="options"></div>
+<div class="actions"><button class="secondary" id="prevBtn">← SEBELUMNYA</button><button class="primary" id="nextBtn">BERIKUTNYA →</button></div>
+</main>
+<aside class="card">
+<h3>BANK SOAL</h3>
+<p style="font-size:13px;color:var(--muted)">Anda tidak wajib menjawab semua soal.</p>
+<div id="nav" class="nav"></div>
+<button class="danger" id="submitBtn" style="width:100%;margin-top:18px">SUBMIT ASSESSMENT</button>
+</aside>
+</div>
+</section>
+
+<section id="scores" class="card hidden">
+<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+<div><h2><span class="accent">DATABASE</span> NILAI</h2><p style="color:var(--muted)">Rekapan yang tampil di sini berasal dari perangkat ini.</p></div>
+<button class="secondary" id="homeBtn">KEMBALI</button><button class="secondary" id="testBtn">TEST DATABASE</button>
+</div>
+<div style="overflow:auto;margin-top:15px"><table><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Nilai</th><th>Benar</th><th>Total</th><th>Waktu</th></tr></thead><tbody id="scoreBody"></tbody></table></div>
+</section>
+</div>
+
+<script>
+const QUESTIONS = [{"q": "Dalam berpikir komputasional, kegiatan memecah masalah besar menjadi beberapa bagian yang lebih kecil disebut ....", "options": ["Abstraksi", "Dekomposisi", "Algoritma", "Pengenalan pola"], "answer": 1}, {"q": "Jioh sedang membuat program untuk menghitung nilai rata-rata siswa. Ia membagi masalah menjadi beberapa bagian, yaitu memasukkan nilai, menjumlahkan nilai, menghitung rata-rata, dan menampilkan hasil. Cara tersebut merupakan contoh ....", "options": ["Pengenalan pola", "Dekomposisi", "Abstraksi", "Sorting"], "answer": 1}, {"q": "Ahnaf menemukan bahwa beberapa masalah yang berbeda ternyata memiliki langkah penyelesaian yang hampir sama. Kemampuan menemukan kesamaan tersebut disebut ....", "options": ["Algoritma", "Dekomposisi", "Abstraksi", "Pengenalan pola"], "answer": 3}, {"q": "Dalam membuat aplikasi jadwal sekolah, Jayden hanya menggunakan informasi nama pelajaran, waktu, dan ruang kelas. Informasi seperti warna sepatu siswa tidak digunakan karena tidak berkaitan dengan tujuan aplikasi. Hal tersebut merupakan contoh ....", "options": ["Dekomposisi", "Pengenalan pola", "Abstraksi", "Perulangan"], "answer": 2}, {"q": "Urutan langkah yang sistematis untuk menyelesaikan suatu permasalahan disebut ....", "options": ["Variabel", "Algoritma", "Abstraksi", "Data"], "answer": 1}, {"q": "Berikut ini yang merupakan contoh penerapan algoritma dalam kehidupan sehari-hari adalah ....", "options": ["Warna tas sekolah", "Bentuk layar komputer", "Langkah-langkah membuat akun email", "Ukuran meja belajar"], "answer": 2}, {"q": "Perhatikan data berikut: 70, 80, 90, 70, 80, 90, 70, 80, 90. Pola yang dapat ditemukan dari data tersebut adalah ....", "options": ["Semua nilai selalu berbeda", "Nilai selalu menurun", "Nilai 70, 80, dan 90 muncul secara berulang", "Tidak terdapat pola"], "answer": 2}, {"q": "Fungsi COUNTIF pada Microsoft Excel digunakan untuk ....", "options": ["Menghitung nilai terbesar", "Menghitung nilai terkecil", "Menghitung jumlah data yang memenuhi kriteria tertentu", "Menghitung rata-rata seluruh data"], "answer": 2}, {"q": "Perhatikan data pada sel A1:A5 berikut: 80, 90, 75, 90, 85. Rumus yang tepat untuk menghitung berapa siswa yang memperoleh nilai 90 adalah ....", "options": ["=COUNT(A1:A5)", "=COUNTIF(A1:A5,80)", "=COUNTIF(A1:A5,90)", "=AVERAGE(A1:A5)"], "answer": 2}, {"q": "Rumus Excel yang digunakan untuk mencari nilai paling tinggi dari sekumpulan data adalah ....", "options": ["MIN", "AVERAGE", "COUNTIF", "MAX"], "answer": 3}, {"q": "Jika nilai pada sel A1 sampai A5 adalah 65, 70, 80, 75, dan 90, rumus untuk mencari nilai terendah adalah ....", "options": ["=MAX(A1:A5)", "=MIN(A1:A5)", "=AVERAGE(A1:A5)", "=COUNTIF(A1:A5)"], "answer": 1}, {"q": "Rumus AVERAGE digunakan untuk ....", "options": ["Menentukan nilai tertinggi", "Menentukan nilai terendah", "Menghitung jumlah data berdasarkan kriteria", "Menghitung nilai rata-rata"], "answer": 3}, {"q": "Arvin memiliki nilai 70, 80, 90, dan 100. Jika menggunakan rumus =AVERAGE(A1:A4), hasil yang diperoleh adalah ....", "options": ["80", "85", "90", "95"], "answer": 1}, {"q": "Fitur Filter pada Excel digunakan untuk ....", "options": ["Menghapus seluruh data", "Mengubah warna komputer", "Menampilkan data berdasarkan kriteria tertentu", "Menghitung nilai rata-rata"], "answer": 2}, {"q": "Razqa memiliki tabel nilai seluruh siswa kelas 8. Ia ingin menampilkan hanya siswa yang memperoleh nilai di atas 80 tanpa menghapus data lainnya. Fitur yang tepat digunakan adalah ....", "options": ["Sort", "Filter", "Merge", "Delete"], "answer": 1}, {"q": "Data nama siswa berikut: Rafi, Arvin, Ahnaf, Jayden. Jika diurutkan berdasarkan abjad dari A sampai Z, urutan yang benar adalah ....", "options": ["Rafi, Jayden, Arvin, Ahnaf", "Jayden, Rafi, Ahnaf, Arvin", "Ahnaf, Arvin, Jayden, Rafi", "Arvin, Ahnaf, Rafi, Jayden"], "answer": 2}, {"q": "Proses mengurutkan data berdasarkan abjad dari A sampai Z disebut ....", "options": ["Filtering", "Sorting ascending", "Sorting descending", "Formatting"], "answer": 1}, {"q": "Dalam flowchart, simbol Terminator biasanya digunakan untuk menunjukkan ....", "options": ["Proses perhitungan", "Input data", "Awal dan akhir suatu algoritma", "Percabangan"], "answer": 2}, {"q": "Simbol flowchart berbentuk persegi panjang biasanya digunakan untuk menunjukkan ....", "options": ["Input/Output", "Decision", "Terminator", "Proses"], "answer": 3}, {"q": "Simbol Decision dalam flowchart digunakan ketika program membutuhkan ....", "options": ["Proses pencetakan", "Pengambilan keputusan berdasarkan kondisi", "Penyimpanan file", "Pengurutan data"], "answer": 1}, {"q": "Dalam flowchart, simbol berbentuk jajar genjang biasanya digunakan untuk menunjukkan ....", "options": ["Proses", "Decision", "Input/Output", "Terminator"], "answer": 2}, {"q": "Danendra membuat flowchart untuk menentukan apakah seorang siswa lulus atau tidak. Setelah memasukkan nilai, terdapat pertanyaan “Apakah nilai ≥ 75?”. Simbol yang tepat untuk pertanyaan tersebut adalah ....", "options": ["Terminator", "Process", "Input/Output", "Decision"], "answer": 3}, {"q": "Diagram yang paling tepat digunakan untuk menunjukkan perbandingan jumlah siswa berdasarkan beberapa kategori adalah ....", "options": ["Diagram lingkaran", "Diagram batang", "Flowchart", "Pseudocode"], "answer": 1}, {"q": "Diagram pie atau diagram lingkaran paling sesuai digunakan untuk menunjukkan ....", "options": ["Langkah-langkah algoritma", "Perbandingan bagian terhadap keseluruhan", "Urutan proses program", "Struktur folder komputer"], "answer": 1}, {"q": "Sebuah kelas memiliki data pilihan ekstrakurikuler: Pramuka 20 siswa, Futsal 15 siswa, Basket 10 siswa, PMR 5 siswa. Diagram yang cocok untuk menunjukkan persentase pilihan ekstrakurikuler adalah ....", "options": ["Flowchart", "Diagram batang saja", "Diagram pie", "Pseudocode"], "answer": 2}, {"q": "Pseudocode digunakan untuk ....", "options": ["Menggambar desain komputer", "Menuliskan langkah algoritma dengan bahasa yang sederhana dan terstruktur", "Menggantikan perangkat keras", "Mengatur koneksi jaringan"], "answer": 1}, {"q": "Dalam pseudocode, START biasanya digunakan untuk menunjukkan ....", "options": ["Perulangan", "Input data", "Awal algoritma", "Akhir algoritma"], "answer": 2}, {"q": "Dalam pseudocode, END digunakan untuk menunjukkan ....", "options": ["Awal proses", "Input", "Percabangan", "Akhir algoritma"], "answer": 3}, {"q": "Perhatikan pseudocode berikut:\nSTART\nINPUT nilai\nIF nilai >= 75 THEN\nOUTPUT “Lulus”\nELSE\nOUTPUT “Tidak Lulus”\nEND\nJika nilai yang dimasukkan adalah 80, output yang dihasilkan adalah ....", "options": ["Tidak Lulus", "Nilai Salah", "Lulus", "80"], "answer": 2}, {"q": "Struktur dasar sebuah program secara umum terdiri dari ....", "options": ["Start, Stop, Delete", "Input, Proses, Output", "Login, Password, Logout", "Copy, Paste, Delete"], "answer": 1}, {"q": "Program komputer dapat diartikan sebagai ....", "options": ["Perangkat keras komputer", "Sekumpulan instruksi yang dibuat untuk menjalankan tugas tertentu", "Kabel yang menghubungkan komputer", "Tempat menyimpan komputer"], "answer": 1}, {"q": "Perhatikan kode Python berikut:\nprint(\"Halo\")\nOutput yang dihasilkan adalah ....", "options": ["print(Halo)", "Halo", "\"print\"", "Halo()"], "answer": 1}, {"q": "Perhatikan kode Python berikut:\nangka = 5\nhasil = angka + 5\nprint(hasil)\nOutput yang dihasilkan adalah ....", "options": ["5", "10", "15", "angka + 5"], "answer": 1}, {"q": "Perhatikan kode Python berikut:\nangka = 5\nhasil = angka + 5\nprint(angka)\nOutput yang dihasilkan adalah ....", "options": ["5", "10", "15", "angka"], "answer": 0}, {"q": "Perhatikan dua data berikut:\nangka = 10\nnama = \"10\"\nPernyataan yang benar adalah ....", "options": ["angka dan nama memiliki tipe data yang sama", "angka merupakan string, sedangkan nama merupakan integer", "angka merupakan integer, sedangkan nama merupakan string", "Keduanya merupakan boolean"], "answer": 2}, {"q": "Perhatikan kode Python berikut:\nnilai = 80\nif nilai >= 75:\nprint(\"Lulus\")\nelse:\nprint(\"Tidak Lulus\")\nOutput yang dihasilkan adalah ....", "options": ["Tidak Lulus", "75", "80", "Lulus"], "answer": 3}, {"q": "Perhatikan kode Python berikut:\nnilai = 65\nif nilai >= 90:\nprint(\"A\")\nelif nilai >= 75:\nprint(\"B\")\nelse:\nprint(\"C\")\nOutput yang dihasilkan adalah ....", "options": ["A", "B", "C", "65"], "answer": 2}, {"q": "Perhatikan kode Python berikut:\nnilai = 85\nif nilai >= 90:\nprint(\"A\")\nelif nilai >= 75:\nprint(\"B\")\nelse:\nprint(\"C\")\nOutput yang dihasilkan adalah ....", "options": ["A", "B", "C", "85"], "answer": 1}, {"q": "Perhatikan program Python berikut:\nangka = 1\nwhile angka <= 5:\nprint(angka)\nangka = angka + 1\nOutput yang dihasilkan adalah ....", "options": ["1, 2, 3, 4", "0, 1, 2, 3, 4", "1, 2, 3, 4, 5", "1, 2, 3, 4, 5, 6"], "answer": 2}, {"q": "Perhatikan program Python berikut:\nangka = 2\nwhile angka <= 8:\nprint(angka)\nangka = angka + 2\nOutput yang dihasilkan adalah ....", "options": ["1, 2, 3, 4", "2, 4, 6", "2, 4, 6, 8", "2, 3, 4, 5, 6, 7, 8"], "answer": 2}];
+const PASSWORD = "CIHUY";
+const QUIZ_MINUTES = 70;
+const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzFuc5I6NiwylD36-3JRZIOOgoSLrdh_UXQKz0WOu9H-wcw9RHuF99NtI6WSiuUgr8GRw/exec";
+
+let current=0, answers=Array(QUESTIONS.length).fill(null), student={name:"",cls:""};
+let timeLeft=QUIZ_MINUTES*60, timerHandle=null, submitted=false;
+
+const $=id=>document.getElementById(id);
+function show(id,yes){$(id).classList.toggle("hidden",!yes)}
+function scores(){try{return JSON.parse(localStorage.getItem("alwafi_scores_v6")||"[]")}catch(e){return[]}}
+
+$("startBtn").onclick=startQuiz;
+$("scoresBtn").onclick=showScores;
+$("prevBtn").onclick=()=>{if(current>0){current--;render()}};
+$("nextBtn").onclick=()=>{if(current<QUESTIONS.length-1){current++;render()}};
+$("submitBtn").onclick=()=>submitQuiz(false);
+$("homeBtn").onclick=goHome;
+$("testBtn").onclick=testDatabase;
+
+function startQuiz(){
+  const name=$("name").value.trim(), cls=$("class").value.trim(), pass=$("password").value;
+  if(!name||!cls){$("startMsg").textContent="Nama dan kelas wajib diisi.";return}
+  if(pass!==PASSWORD){$("startMsg").textContent="Password salah.";return}
+  student={name:name,cls:cls}; current=0; answers=Array(QUESTIONS.length).fill(null); submitted=false;
+  $("badge").textContent=name+" • "+cls; show("start",false); show("scores",false); show("quiz",true);
+  startTimer(); render();
+}
+
+function startTimer(){
+  clearInterval(timerHandle); timeLeft=QUIZ_MINUTES*60; updateTimer();
+  timerHandle=setInterval(()=>{
+    timeLeft--; updateTimer();
+    if(timeLeft<=0){clearInterval(timerHandle); submitQuiz(true)}
+  },1000);
+}
+
+function updateTimer(){
+  const m=Math.floor(timeLeft/60), s=timeLeft%60;
+  $("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  $("timer").style.color=timeLeft<=300?"#ff5370":"#00e5ff";
+}
+
+function render(){
+  const q=QUESTIONS[current]; $("qNo").textContent="SOAL "+(current+1); $("progress").textContent=(current+1)+" / "+QUESTIONS.length;
+  $("question").textContent=q.q;
+  $("options").innerHTML="";
+  q.options.forEach((t,i)=>{const b=document.createElement("button");b.className="option"+(answers[current]===i?" selected":"");b.textContent=String.fromCharCode(65+i)+". "+t;b.onclick=()=>{answers[current]=i;render()};$("options").appendChild(b)});
+  $("nav").innerHTML="";
+  QUESTIONS.forEach((_,i)=>{const b=document.createElement("button");b.textContent=i+1;b.className=(i===current?"current ":"")+(answers[i]!==null?"answered":"");b.onclick=()=>{current=i;render()};$("nav").appendChild(b)});
+}
+
+async function submitQuiz(auto){
+  if(submitted)return;
+  if(!auto&&!confirm("Kirim jawaban sekarang? Soal yang kosong akan mendapat 0 poin."))return;
+  submitted=true; clearInterval(timerHandle);
+  let correct=0; answers.forEach((a,i)=>{if(a===QUESTIONS[i].answer)correct++});
+  const score=Math.round(correct/QUESTIONS.length*100);
+  const record={name:student.name,class:student.cls,score:score,correct:correct,total:QUESTIONS.length,time:new Date().toLocaleString("id-ID")};
+  const local=scores();local.push(record);localStorage.setItem("alwafi_scores_v6",JSON.stringify(local));
+
+  // Use URL-encoded POST. This avoids a browser CORS preflight.
+  try{
+    const body=new URLSearchParams(record).toString();
+    await fetch(GOOGLE_SHEETS_WEBAPP_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:body});
+  }catch(e){console.error("Google Sheets submission failed",e)}
+
+  alert("Assessment selesai. Nilai: "+score);
+  showScores();
+}
+
+async function testDatabase(){
+  try{
+    const res = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {method:"GET"});
+    const text = await res.text();
+    alert("Koneksi Web App berhasil.\n\nRespons:\n" + text);
+  }catch(e){
+    alert("Koneksi gagal: " + e.message);
+  }
+}
+
+function showScores(){show("start",false);show("quiz",false);show("scores",true);renderScores()}
+function renderScores(){
+  const rows=scores(), body=$("scoreBody"); body.innerHTML="";
+  if(!rows.length){body.innerHTML='<tr><td colspan="7">Belum ada data.</td></tr>';return}
+  rows.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    [i+1,r.name,r.class].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+    const s=document.createElement("td");s.className="score";s.textContent=r.score;tr.appendChild(s);
+    [r.correct,r.total,r.time].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+    body.appendChild(tr);
+  });
+}
+function goHome(){clearInterval(timerHandle);show("scores",false);show("quiz",false);show("start",true);$("badge").textContent="";}
+</script>
+</body>
+</html>
